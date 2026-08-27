@@ -29,13 +29,13 @@ export default function ApplicationForm() {
 
     try {
       const res = await fetch('/api/apply', { method: 'POST', body: fd })
-      if (res.ok) {
+      const json = await res.json()
+      if (res.ok && json.success) {
         setStatus('Başvurunuz başarıyla gönderildi.')
         reset()
         setFiles([])
       } else {
-        const txt = await res.text()
-        setStatus('Hata: ' + txt)
+        setStatus('Hata: ' + (json?.message || 'Bilinmeyen hata'))
       }
     } catch (err: any) {
       setStatus('Sunucu hatası: ' + (err.message || String(err)))

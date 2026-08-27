@@ -18,7 +18,7 @@ function parseForm(req: NextApiRequest): Promise<{ fields: any, files: any }> {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') return res.status(405).send('Method not allowed')
+  if (req.method !== 'POST') return res.status(405).json({ success: false, message: 'Method not allowed' })
 
   try {
     const { fields, files } = await parseForm(req)
@@ -31,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const uploaded = files.pdfs ? (Array.isArray(files.pdfs) ? files.pdfs : [files.pdfs]) : []
     if (uploaded.length > 4) {
       cleanupFiles(uploaded)
-      return res.status(400).send('En fazla 4 dosya yükleyebilirsiniz.')
+      return res.status(400).json({ success: false, message: 'En fazla 4 dosya yükleyebilirsiniz.' })
     }
 
     const attachments: { filename: string, path: string }[] = []
@@ -41,20 +41,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const size = f.size || 0
       if (!mime || !mime.includes('pdf')) {
         cleanupFiles(uploaded)
-        return res.status(400).send('Sadece PDF dosyalarına izin verilir.')
+        return res.status(400).json({ success: false, message: 'Sadece PDF dosyalarına izin verilir.' })
       }
       attachments.push({ filename: f.originalFilename || (fp ? fp.split('/').pop() : 'file.pdf'), path: fp })
     }
 
-    await sendApplicationEmail({ name, email, phone, company, message, attachments })
+    try {
+      await sendApplicationEmail({ name, email, phone, company, message, attachments })
+    } catch (mailErr: any) {
+      console.error('nodemailer error', mailErr)
+      // Save attempt or notify admin in future; for now return clear error
+      cleanupFiles(uploaded)
+      return res.status(502).json({ success: false, message: 'E-posta gönderimi başarısız: ' + (mailErr.message || String(mailErr)) })
+    }
 
     // cleanup
     cleanupFiles(uploaded)
 
-    return res.status(200).send('Gönderildi')
+    return res.status(200).json({ success: true, message: 'Başvurunuz alındı. Teşekkür ederiz.' })
   } catch (err: any) {
     console.error('apply api error', err)
-    return res.status(500).send(err.message || 'Sunucu hatası')
+    return res.status(500).json({ success: false, message: err.message || 'Sunucu hatası' })
   }
 }
 

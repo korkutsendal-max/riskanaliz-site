@@ -1,0 +1,1 @@
+Updated: added email-test endpoint, improved API responses to JSON and improved frontend form handling. Added placeholder logo and og-image SVGs. Expanded landing page with extra sections (How it works, CTA, FAQ) and SEO image.
