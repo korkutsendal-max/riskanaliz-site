@@ -2,9 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body, #__next {
-  height: 100%;
+:root{
+  --color-navy: #071031;
+  --color-cyan: #06b6d4;
+  --glass-bg: rgba(255,255,255,0.06);
 }
-body {
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-}
+
+html, body, #__next { height: 100%; }
+body { background: linear-gradient(180deg, #071031 0%, #000000 100%); color: #ffffff; }
