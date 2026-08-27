@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://riskanaliz.com.tr/sitemap.xml
